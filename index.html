@@ -1,94 +1,124 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site de Jogos Interativo</title>
+    <title>Jogo de Tiros</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        nav {
-            background-color: #444;
-            padding: 10px;
-        }
-
-        nav ul {
-            list-style-type: none;
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-        }
-
-        nav a {
+            height: 100vh;
+            margin: 0;
+            background-color: #282c34;
             color: white;
-            text-decoration: none;
-            padding: 0 10px;
+            font-family: Arial, sans-serif;
+            touch-action: manipulation; /* Melhora a experiência de toque */
         }
-
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
+        #gameArea {
+            position: relative;
+            width: 90vw; /* Largura responsiva */
+            height: 70vh; /* Altura responsiva */
+            border: 2px solid #61dafb;
+            overflow: hidden;
+            background-color: #2c3e50;
+            border-radius: 10px; /* Bordas arredondadas */
         }
-
-        section {
-            padding: 20px;
-            text-align: center;
+        .target {
+            position: absolute;
+            width: 10vw; /* Tamanho responsivo */
+            height: 10vw; /* Tamanho responsivo */
+            max-width: 50px; /* Limita o tamanho máximo */
+            max-height: 50px; /* Limita o tamanho máximo */
+            background-color: red;
+            border-radius: 50%;
+            cursor: pointer; /* Muda o cursor para indicar que é clicável */
+        }
+        #score {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #61dafb;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #21a1f1;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Tudo Futebool</h1>
-        <img src="https://imagepng.org/bola/bola/" width="50px" alt="imagem pequena">
-    </header>
-    <nav>
-        <ul>
-            <li><a href="https://ge.globo.com/futebol/" onclick="loadContent('ultimas_noticias')">Últimas Notícias</a></li>
-            <li><a href="https://www.academiadasapostasbrasil.com/previews" onclick="loadContent('analises')">Análises</a></li>
-            <li><a href="https://ardos.com.br/7-dicas-para-ficar-craque-no-futebol/" onclick="loadContent('dicas_truques')">Dicas e Truques</a></li>
-            <li><a href="https://gruposwhats.app/category/futebol" onclick="loadContent('comunidade')">Comunidade</a></li>
-        </ul>
-    </nav>
-    <section id="content">
-        <!-- Conteúdo será carregado dinamicamente aqui -->
-         <div>
-             <h1>Futebool</h1>
-         <img src="imag/futebol.jpg" width="250px" alt="imagem grande">
-         <img src="imag/money-jogadores-futebol-mais-bem-pagos.webp" width="222px" alt="imagem grande">
-         <img src="imag/d766df73-34ab-4fe6-9ca1-56a2a1b3c114.jpeg" width="237px" alt="imagem grande">
-         </div>
-        
-    </section>
-    <footer>
-        <p>&copy; 2024 Tudo Futebool</p>
-        <boby>
-            <a href="https://www.instagram.com/yurisilva1.s/"><input type="button" value="Instagram"></a>
-        </boby>
-    </footer>
+
+    <h1>Jogo de Tiros</h1>
+    <div id="gameArea"></div>
+    <div id="score">Pontuação: 0</div>
+    <button id="restartButton">Reiniciar Jogo</button>
+
     <script>
-        function loadContent(page) {
-            const content = document.getElementById('content');
-            fetch(`${page}.html`)
-                .then(response => response.text())
-                .then(data => {
-                    content.innerHTML = data;
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar conteúdo:', error);
-                });
+        let score = 0;
+        const gameArea = document.getElementById('gameArea');
+        const scoreDisplay = document.getElementById('score');
+        let spawnInterval = 1000; // Milissegundos para gerar novos alvos
+        let targetLifetime = 2000; // Milissegundos que os alvos permanecem
+        let gameInterval;
+
+        function spawnTarget() {
+            const target = document.createElement('div');
+            target.className = 'target';
+            target.style.top = Math.random() * (gameArea.clientHeight - 50) + 'px';
+            target.style.left = Math.random() * (gameArea.clientWidth - 50) + 'px';
+            target.addEventListener('click', hitTarget);
+            gameArea.appendChild(target);
+            setTimeout(() => {
+                if (target.parentNode) {
+                    target.remove();
+                }
+            }, targetLifetime);
         }
+
+        function hitTarget(event) {
+            score++;
+            scoreDisplay.innerText = 'Pontuação: ' + score;
+            event.target.remove();
+            updateGameSpeed();
+        }
+
+        function updateGameSpeed() {
+            if (score >= 100) {
+                alert('Você ganhou! Pontuação final: ' + score);
+                clearInterval(gameInterval); // Para o jogo
+                return;
+            } else if (score >= 80) {
+                spawnInterval = 250; // 4x mais rápido
+            } else if (score >= 40) {
+                spawnInterval = 333; // 3x mais rápido
+            } else if (score >= 15) {
+                spawnInterval = 500; // 2x mais rápido
+            }
+            clearInterval(gameInterval);
+            gameInterval = setInterval(spawnTarget, spawnInterval);
+        }
+
+        function startGame() {
+            score = 0;
+            scoreDisplay.innerText = 'Pontuação: 0';
+            gameArea.innerHTML = '';
+            spawnInterval = 1000; // Reseta a velocidade
+            targetLifetime = 2000; // Reseta o tempo de vida dos alvos
+
+            gameInterval = setInterval(spawnTarget, spawnInterval);
+        }
+
+        document.getElementById('restartButton').addEventListener('click', startGame);
+        startGame();
     </script>
+
 </body>
 </html>
