@@ -375,26 +375,49 @@
     font-size: 1.5em;
     user-select: none;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
 }
 .estrela {
     cursor: pointer;
-    color: #e74c3c;
+    color: #ccc;
     transition: color 0.2s;
     font-size: 1.3em;
     padding: 0 2px;
 }
-.estrela:hover,
-.estrela:hover ~ .estrela {
-    color: #ffb347;
+.estrela.selected {
+    color: #e74c3c !important;
+}
+.estrela.hovered {
+    color: #ffb347 !important;
+}
+#comentarios-list {
+    margin-top: 24px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
 }
         </style>
+        <!-- Firebase App (the core Firebase SDK) -->
+        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+        <!-- Firebase Firestore -->
+        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
         <script>
             window.onload = function() {
                 setTimeout(function() {
                     const welcomeScreen = document.getElementById("welcome");
                     welcomeScreen.style.opacity = "0";
-                    setTimeout(() => { welcomeScreen.style.display = "none"; }, 1000);
+                    setTimeout(() => {
+                        welcomeScreen.style.display = "none";
+                        // Mostra o restante do site após esconder a tela de boas-vindas
+                        document.body.style.overflow = "auto";
+                    }, 1000);
                 }, 2200);
+                // Garante que o restante do site fique visível
+                document.body.style.overflow = "hidden";
             };
             function abrirModal(servico) {
                 document.getElementById("modal").style.display = "flex";
@@ -426,73 +449,93 @@
               measurementId: "G-L4HEY8EG88"
             };
             if(firebaseConfig && firebaseConfig.apiKey){
-              firebase.initializeApp(firebaseConfig);
-              const db = firebase.firestore();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-              function renderComentario(doc) {
-                const nome = doc.data().nome || 'Anônimo';
-                const texto = doc.data().texto || '';
-                const estrelas = doc.data().estrelas || 5;
-                const data = doc.data().data ? new Date(doc.data().data.seconds*1000) : null;
-                const dataStr = data ? data.toLocaleDateString('pt-BR') : '';
-                let estrelasHtml = '';
-                for(let i=1;i<=5;i++) estrelasHtml += i<=estrelas ? '★' : '☆';
-                const html = `<div class='depoimento'>
-                  <div class='depoimento-nome'>${nome}</div>
-                  <div class='depoimento-estrelas'>${estrelasHtml}</div>
-                  <p>${texto}</p>
-                  <div style='font-size:0.9em;color:#aaa;margin-top:4px;'>${dataStr}</div>
-                </div>`;
-                return html;
-              }
+  function renderComentario(doc) {
+    const nome = doc.data().nome || 'Anônimo';
+    const texto = doc.data().texto || '';
+    const estrelas = doc.data().estrelas || 5;
+    const data = doc.data().data ? new Date(doc.data().data.seconds*1000) : null;
+    const dataStr = data ? data.toLocaleDateString('pt-BR') : '';
+    let estrelasHtml = '';
+    for(let i=1;i<=5;i++) estrelasHtml += i<=estrelas ? '<span style="color:#e74c3c;font-size:1.2em">★</span>' : '<span style="color:#ccc;font-size:1.2em">★</span>';
+    const html = `<div class='depoimento'>
+      <div class='depoimento-nome'>${nome}</div>
+      <div class='depoimento-estrelas'>${estrelasHtml}</div>
+      <p>${texto}</p>
+      <div style='font-size:0.9em;color:#aaa;margin-top:4px;'>${dataStr}</div>
+    </div>`;
+    return html;
+  }
 
-              function carregarComentarios() {
-                db.collection('comentarios').orderBy('data','desc').limit(10).onSnapshot(snapshot => {
-                  let html = '';
-                  snapshot.forEach(doc => { html += renderComentario(doc); });
-                  document.getElementById('depoimentos-list').innerHTML = html + document.getElementById('depoimentos-list').innerHTML;
-                });
-              }
+  function carregarComentarios() {
+    db.collection('comentarios').orderBy('data','desc').limit(20).onSnapshot(snapshot => {
+      let html = '';
+      snapshot.forEach(doc => { html += renderComentario(doc); });
+      document.getElementById('comentarios-list').innerHTML = html;
+    });
+  }
 
-              window.enviarComentario = function() {
-                const nome = document.getElementById('comentario-nome').value.trim();
-                const texto = document.getElementById('comentario-texto').value.trim();
-                const estrelas = parseInt(document.getElementById('comentario-estrelas').value) || 5;
-                if(!texto){
-                  document.getElementById('comentario-status').innerText = 'Digite um comentário.';
-                  return;
-                }
-                db.collection('comentarios').add({
-                  nome: nome || 'Anônimo',
-                  texto: texto,
-                  estrelas: estrelas,
-                  data: new Date()
-                }).then(()=>{
-                  document.getElementById('comentario-status').innerText = 'Comentário enviado!';
-                  document.getElementById('comentario-nome').value = '';
-                  document.getElementById('comentario-texto').value = '';
-                  document.getElementById('comentario-estrelas').value = 5;
-                  setEstrelas(5);
-                  setTimeout(()=>{document.getElementById('comentario-status').innerText='';},2000);
-                }).catch(()=>{
-                  document.getElementById('comentario-status').innerText = 'Erro ao enviar. Tente novamente.';
-                });
-              }
+  // Remove duplicação/confusão de funções de estrelas e mantenha apenas uma versão correta e funcional:
+  // Estrelas interativas
+  let estrelasSelecionadas = 5;
+  const estrelas = document.querySelectorAll('.estrelas-input .estrela');
+  estrelas.forEach((estrela, idx) => {
+    estrela.addEventListener('mouseenter', () => {
+      estrelas.forEach((e, i) => {
+        e.classList.toggle('hovered', i <= idx);
+        if (i > idx) e.classList.remove('selected');
+      });
+    });
+    estrela.addEventListener('mouseleave', () => {
+      estrelas.forEach((e, i) => {
+        e.classList.remove('hovered');
+        e.classList.toggle('selected', i < estrelasSelecionadas);
+      });
+    });
+    estrela.addEventListener('click', () => {
+      estrelasSelecionadas = idx + 1;
+      document.getElementById('comentario-estrelas').value = estrelasSelecionadas;
+      estrelas.forEach((e, i) => {
+        e.classList.toggle('selected', i < estrelasSelecionadas);
+      });
+    });
+  });
+  // Inicializa com 5 estrelas selecionadas
+  estrelas.forEach((e, i) => e.classList.toggle('selected', i < 5));
+  document.getElementById('comentario-estrelas').value = 5;
 
-              function setEstrelas(valor) {
-                document.getElementById('comentario-estrelas').value = valor;
-                document.querySelectorAll('.estrelas-input .estrela').forEach((el,i)=>{
-                  el.style.color = (i<valor)?'#e74c3c':'#ccc';
-                });
-              }
-              document.querySelectorAll('.estrelas-input .estrela').forEach((el,i)=>{
-                el.addEventListener('click',()=>setEstrelas(i+1));
-              });
+  carregarComentarios();
 
-              setEstrelas(5);
-              carregarComentarios();
-            }
-        </script>
+  document.getElementById('btn-enviar-comentario').onclick = function() {
+    const nome = document.getElementById('comentario-nome').value.trim();
+    const texto = document.getElementById('comentario-texto').value.trim();
+    const estrelas = parseInt(document.getElementById('comentario-estrelas').value) || 5;
+    if(!texto){
+      document.getElementById('comentario-status').innerText = 'Digite um comentário.';
+      return;
+    }
+    db.collection('comentarios').add({
+      nome: nome || 'Anônimo',
+      texto: texto,
+      estrelas: estrelas,
+      data: new Date()
+    }).then(()=>{
+      document.getElementById('comentario-status').innerText = 'Comentário enviado!';
+      document.getElementById('comentario-nome').value = '';
+      document.getElementById('comentario-texto').value = '';
+      document.getElementById('comentario-estrelas').value = 5;
+      estrelasSelecionadas = 5;
+      estrelas.forEach((e, i) => e.classList.toggle('selected', i < 5));
+      setTimeout(()=>{document.getElementById('comentario-status').innerText='';},2000);
+    }).catch(()=>{
+      document.getElementById('comentario-status').innerText = 'Erro ao enviar. Tente novamente.';
+    });
+  }
+  // Fim do bloco do Firebase
+} // <-- fechamento do if(firebaseConfig && firebaseConfig.apiKey)
+    </script>
     </head>
     <body>
         <div class="welcome-screen" id="welcome">
@@ -510,7 +553,6 @@
             <nav>
                 <a href="#sobre">Sobre</a>
                 <a href="#servicos">Serviços</a>
-                <a href="#depoimentos">Depoimentos</a>
                 <a href="#contato">Contato</a>
             </nav>
         </header>
@@ -551,42 +593,6 @@
                 </div>
             </div>
         </section>
-        <section id="depoimentos">
-            <h2>O que dizem nossos clientes</h2>
-            <div class="depoimentos-list" id="depoimentos-list">
-                <div class="depoimento">
-                    <div class="depoimento-nome">Ana Paula</div>
-                    <div class="depoimento-estrelas">★★★★★</div>
-                    <p>"O Alegria Fest fez do aniversário do meu filho um sonho! Organização impecável e muita atenção aos detalhes."</p>
-                </div>
-                <div class="depoimento">
-                    <div class="depoimento-nome">Carlos Eduardo</div>
-                    <div class="depoimento-estrelas">★★★★★</div>
-                    <p>"Equipe super profissional, decoração linda e buffet delicioso. Recomendo de olhos fechados!"</p>
-                </div>
-                <div class="depoimento">
-                    <div class="depoimento-nome">Juliana Silva</div>
-                    <div class="depoimento-estrelas">★★★★★</div>
-                    <p>"Contratei para um evento corporativo e foi um sucesso. Todos elogiaram!"</p>
-                </div>
-            </div>
-            <div class="comentario-form">
-                <h3>Deixe seu comentário</h3>
-                <input type="text" id="comentario-nome" placeholder="Seu nome" maxlength="30" required>
-                <textarea id="comentario-texto" placeholder="Seu comentário" maxlength="180" required></textarea>
-                <div class="estrelas-input" style="margin: 6px 0 0 0;">
-                    <label style="font-weight:600;color:#e74c3c;">Sua avaliação:</label><br>
-                    <span class="estrela" data-valor="1">&#9733;</span>
-                    <span class="estrela" data-valor="2">&#9733;</span>
-                    <span class="estrela" data-valor="3">&#9733;</span>
-                    <span class="estrela" data-valor="4">&#9733;</span>
-                    <span class="estrela" data-valor="5">&#9733;</span>
-                </div>
-                <input type="hidden" id="comentario-estrelas" value="5">
-                <button onclick="enviarComentario()">Enviar Comentário</button>
-                <div id="comentario-status" style="margin-top:8px;color:#e74c3c;font-size:0.95em;"></div>
-            </div>
-        </section>
         <section id="contato">
             <h2>Entre em Contato</h2>
             <p><b>Nome dos Participantes:</b> João, Maria, Carlos</p>
@@ -598,7 +604,7 @@
             <div class="modal-content">
                 <span class="close" onclick="fecharModal()">&times;</span>
                 <h2>Solicitação de Serviço</h2>
-                <img src="img/Alegria Fest.png" alt="Logo">
+                <img src="img/Alegria Fest.PNG" alt="Logo">
                 <input type="text" id="nome" placeholder="Seu Nome" required>
                 <input type="text" id="servicoSelecionado" placeholder="Serviço Desejado" readonly>
                 <input type="email" id="email" placeholder="Seu E-mail" required>
