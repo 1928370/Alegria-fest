@@ -1,124 +1,625 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Tiros</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #282c34;
-            color: white;
-            font-family: Arial, sans-serif;
-            touch-action: manipulation; /* Melhora a experiência de toque */
-        }
-        #gameArea {
-            position: relative;
-            width: 90vw; /* Largura responsiva */
-            height: 70vh; /* Altura responsiva */
-            border: 2px solid #61dafb;
-            overflow: hidden;
-            background-color: #2c3e50;
-            border-radius: 10px; /* Bordas arredondadas */
-        }
-        .target {
-            position: absolute;
-            width: 10vw; /* Tamanho responsivo */
-            height: 10vw; /* Tamanho responsivo */
-            max-width: 50px; /* Limita o tamanho máximo */
-            max-height: 50px; /* Limita o tamanho máximo */
-            background-color: red;
-            border-radius: 50%;
-            cursor: pointer; /* Muda o cursor para indicar que é clicável */
-        }
-        #score {
-            font-size: 1.5em;
-            margin-top: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            background-color: #61dafb;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #21a1f1;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Jogo de Tiros</h1>
-    <div id="gameArea"></div>
-    <div id="score">Pontuação: 0</div>
-    <button id="restartButton">Reiniciar Jogo</button>
-
-    <script>
-        let score = 0;
-        const gameArea = document.getElementById('gameArea');
-        const scoreDisplay = document.getElementById('score');
-        let spawnInterval = 1000; // Milissegundos para gerar novos alvos
-        let targetLifetime = 2000; // Milissegundos que os alvos permanecem
-        let gameInterval;
-
-        function spawnTarget() {
-            const target = document.createElement('div');
-            target.className = 'target';
-            target.style.top = Math.random() * (gameArea.clientHeight - 50) + 'px';
-            target.style.left = Math.random() * (gameArea.clientWidth - 50) + 'px';
-            target.addEventListener('click', hitTarget);
-            gameArea.appendChild(target);
-            setTimeout(() => {
-                if (target.parentNode) {
-                    target.remove();
-                }
-            }, targetLifetime);
-        }
-
-        function hitTarget(event) {
-            score++;
-            scoreDisplay.innerText = 'Pontuação: ' + score;
-            event.target.remove();
-            updateGameSpeed();
-        }
-
-        function updateGameSpeed() {
-            if (score >= 100) {
-                alert('Você ganhou! Pontuação final: ' + score);
-                clearInterval(gameInterval); // Para o jogo
-                return;
-            } else if (score >= 80) {
-                spawnInterval = 250; // 4x mais rápido
-            } else if (score >= 40) {
-                spawnInterval = 333; // 3x mais rápido
-            } else if (score >= 15) {
-                spawnInterval = 500; // 2x mais rápido
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Alegria Fest - Eventos</title>
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Montserrat', Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background: linear-gradient(135deg, #f8fafc 0%, #ffe0e9 100%);
+                color: #222;
+                text-align: center;
+                overflow-x: hidden;
             }
-            clearInterval(gameInterval);
-            gameInterval = setInterval(spawnTarget, spawnInterval);
-        }
+            header {
+                padding: 30px 0 10px 0;
+                background: linear-gradient(90deg, #e74c3c 0%, #ffb347 100%);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            }
+            h1 {
+                margin: 0;
+                font-size: 2.8em;
+                font-weight: 700;
+                letter-spacing: 2px;
+                color: #fff;
+            }
+            nav {
+                margin: 20px 0 0 0;
+            }
+            nav a {
+                color: #fff;
+                margin: 0 18px;
+                text-decoration: none;
+                font-weight: 700;
+                font-size: 1.1em;
+                transition: color 0.2s;
+            }
+            nav a:hover {
+                color: #222;
+            }
+            section {
+                padding: 40px 10px 30px 10px;
+                background: rgba(255,255,255,0.95);
+                margin: 0 auto 30px auto;
+                max-width: 1100px;
+                border-radius: 18px;
+                box-shadow: 0 4px 24px rgba(231,76,60,0.07);
+            }
+            section#sobre {
+                margin-top: 30px;
+            }
+            h2 {
+                color: #e74c3c;
+                font-size: 2em;
+                margin-bottom: 18px;
+                font-weight: 700;
+            }
+            .servicos {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 32px;
+                margin-top: 30px;
+            }
+            .servico-card {
+                background: #fff;
+                border-radius: 16px;
+                box-shadow: 0 6px 24px rgba(44,62,80,0.10);
+                width: 270px;
+                padding: 0 0 24px 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                transition: transform 0.2s, box-shadow 0.2s;
+                cursor: pointer;
+                position: relative;
+            }
+            .servico-card:hover {
+                transform: translateY(-8px) scale(1.03);
+                box-shadow: 0 12px 32px rgba(231,76,60,0.18);
+            }
+            .servico-card img {
+                width: 100%;
+                height: 160px;
+                object-fit: cover;
+                border-radius: 16px 16px 0 0;
+            }
+            .servico-card h3 {
+                margin: 18px 0 8px 0;
+                font-size: 1.25em;
+                color: #e74c3c;
+                font-weight: 700;
+            }
+            .servico-card p {
+                color: #444;
+                font-size: 1em;
+                margin: 0 0 10px 0;
+            }
+            .servico-preco {
+                font-weight: bold;
+                color: #ffb347;
+                font-size: 1.1em;
+                margin-bottom: 12px;
+            }
+            .servico-card button {
+                background: linear-gradient(90deg, #e74c3c 0%, #ffb347 100%);
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 0;
+                width: 80%;
+                font-size: 1em;
+                font-weight: 700;
+                margin-top: 8px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .servico-card button:hover {
+                background: linear-gradient(90deg, #ffb347 0%, #e74c3c 100%);
+            }
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(44,62,80,0.45);
+                align-items: center;
+                justify-content: center;
+            }
+            .modal-content {
+                background-color: #fff;
+                margin: 5% auto;
+                padding: 32px 24px 24px 24px;
+                border-radius: 16px;
+                width: 90%;
+                max-width: 400px;
+                color: #222;
+                text-align: left;
+                box-shadow: 0 8px 32px rgba(44,62,80,0.18);
+                position: relative;
+            }
+            .modal-content h2 {
+                color: #e74c3c;
+                text-align: center;
+                margin-bottom: 18px;
+            }
+            .modal-content img {
+                display: block;
+                margin: 0 auto 18px auto;
+                width: 90px;
+            }
+            .close {
+                position: absolute;
+                top: 18px;
+                right: 18px;
+                font-size: 2em;
+                color: #e74c3c;
+                cursor: pointer;
+                font-weight: bold;
+            }
+            input[type="text"], input[type="email"] {
+                width: 100%;
+                padding: 12px;
+                margin: 10px 0 16px 0;
+                border: 1px solid #eee;
+                border-radius: 6px;
+                background-color: #f8fafc;
+                color: #222;
+                font-size: 1em;
+                transition: border 0.3s;
+            }
+            input[type="text"]:focus, input[type="email"]:focus {
+                border: 1.5px solid #e74c3c;
+            }
+            button {
+                background: linear-gradient(90deg, #e74c3c 0%, #ffb347 100%);
+                color: white;
+                padding: 12px 0;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                width: 100%;
+                font-size: 1.1em;
+                font-weight: 700;
+                margin-top: 8px;
+                transition: background 0.2s;
+            }
+            button:hover {
+                background: linear-gradient(90deg, #ffb347 0%, #e74c3c 100%);
+            }
+            footer {
+                padding: 24px 0;
+                background: linear-gradient(90deg, #e74c3c 0%, #ffb347 100%);
+                color: #fff;
+                font-size: 1.1em;
+                letter-spacing: 1px;
+                border-radius: 18px 18px 0 0;
+                margin-top: 40px;
+                box-shadow: 0 -2px 8px rgba(44,62,80,0.07);
+            }
+            /* Welcome screen */
+            .welcome-screen {
+                position: fixed;
+                z-index: 2000;
+                left: 0;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                color: #fff;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                opacity: 1;
+                background: linear-gradient(135deg, #e74c3c 0%, #ffb347 100%);
+                transition: opacity 1s ease-out;
+            }
+            .welcome-logo {
+                width: 220px;
+                margin-bottom: 24px;
+                animation: shine 1.5s infinite;
+            }
+            video {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                object-fit: cover;
+                filter: blur(8px) brightness(0.5);
+                z-index: -1;
+            }
+            @keyframes shine {
+                0% { text-shadow: 0 0 10px #fff, 0 0 20px #fff6; }
+                100% { text-shadow: 0 0 20px #fff, 0 0 40px #fff6; }
+            }
+            .badge-verificado {
+                background: #25d366;
+                color: #fff;
+                font-size: 0.7em;
+                padding: 3px 10px 3px 8px;
+                border-radius: 12px;
+                margin-left: 8px;
+                vertical-align: middle;
+                font-weight: 700;
+                box-shadow: 0 1px 4px #25d36633;
+                letter-spacing: 1px;
+                display: inline-block;
+                animation: pulse 1.5s infinite alternate;
+            }
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 #25d36655; }
+                100% { box-shadow: 0 0 8px 4px #25d36633; }
+            }
+            .sub-header {
+                color: #fff;
+                font-size: 1.1em;
+                margin-bottom: 8px;
+                margin-top: 6px;
+                letter-spacing: 1px;
+                font-weight: 400;
+                opacity: 0.92;
+            }
+            #depoimentos {
+                background: linear-gradient(120deg, #fff6f0 60%, #ffe0e9 100%);
+                box-shadow: 0 4px 24px rgba(231,76,60,0.07);
+                border-radius: 18px;
+                margin-bottom: 30px;
+            }
+            .depoimentos-list {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 32px;
+                margin-top: 18px;
+            }
+            .depoimento {
+                background: #fff;
+                border-radius: 14px;
+                box-shadow: 0 4px 16px #e74c3c11;
+                padding: 24px 18px 18px 18px;
+                max-width: 320px;
+                min-width: 220px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                transition: transform 0.18s, box-shadow 0.18s;
+            }
+            .depoimento:hover {
+                transform: translateY(-6px) scale(1.03);
+                box-shadow: 0 8px 32px #e74c3c22;
+            }
+            .depoimento-nome {
+                font-weight: 700;
+                color: #e74c3c;
+                margin-bottom: 2px;
+                font-size: 1.1em;
+            }
+            .depoimento-estrelas {
+                color: #ffb347;
+                font-size: 1.2em;
+                margin-bottom: 8px;
+            }
+            .footer-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            .footer-social {
+                display: flex;
+                gap: 18px;
+                margin-top: 8px;
+            }
+            .footer-icon svg {
+                vertical-align: middle;
+                transition: transform 0.18s;
+            }
+            .footer-icon:hover svg {
+                transform: scale(1.18) rotate(-6deg);
+            }
+            .comentario-form {
+                background: #fff6f0;
+                border-radius: 14px;
+                box-shadow: 0 2px 8px #e74c3c11;
+                padding: 18px 16px 12px 16px;
+                margin: 32px auto 0 auto;
+                max-width: 400px;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .comentario-form input, .comentario-form textarea {
+                border: 1px solid #eee;
+                border-radius: 6px;
+                padding: 10px;
+                font-size: 1em;
+                background: #fff;
+                color: #222;
+                resize: none;
+            }
+            .comentario-form textarea {
+                min-height: 60px;
+                max-height: 120px;
+            }
+            .comentario-form button {
+                background: linear-gradient(90deg, #e74c3c 0%, #ffb347 100%);
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 0;
+                font-size: 1em;
+                font-weight: 700;
+                cursor: pointer;
+                margin-top: 6px;
+                transition: background 0.2s;
+            }
+            .comentario-form button:hover {
+                background: linear-gradient(90deg, #ffb347 0%, #e74c3c 100%);
+            }
+            @media (max-width: 900px) {
+                .servicos { flex-direction: column; align-items: center; }
+                .servico-card { width: 95vw; max-width: 350px; }
+                .depoimentos-list { flex-direction: column; align-items: center; }
+            }
+            .estrelas-input {
+    font-size: 1.5em;
+    user-select: none;
+    margin-bottom: 4px;
+}
+.estrela {
+    cursor: pointer;
+    color: #e74c3c;
+    transition: color 0.2s;
+    font-size: 1.3em;
+    padding: 0 2px;
+}
+.estrela:hover,
+.estrela:hover ~ .estrela {
+    color: #ffb347;
+}
+        </style>
+        <script>
+            window.onload = function() {
+                setTimeout(function() {
+                    const welcomeScreen = document.getElementById("welcome");
+                    welcomeScreen.style.opacity = "0";
+                    setTimeout(() => { welcomeScreen.style.display = "none"; }, 1000);
+                }, 2200);
+            };
+            function abrirModal(servico) {
+                document.getElementById("modal").style.display = "flex";
+                document.getElementById("servicoSelecionado").value = servico;
+                document.getElementById("contato").scrollIntoView({ behavior: 'smooth' });
+            }
+            function fecharModal() {
+                document.getElementById("modal").style.display = "none";
+            }
+            function enviarWhatsApp() {
+                const nome = document.getElementById("nome").value;
+                const email = document.getElementById("email").value;
+                const servico = document.getElementById("servicoSelecionado").value;
+                const mensagem = `Olá! Gostaria de solicitar um serviço.\nNome: ${nome}\nE-mail: ${email}\nServiço: ${servico}`;
+                const numeroWhatsApp = "5511999999999";
+                const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+                window.open(url, '_blank');
+                fecharModal();
+            }
+            // Firebase configuration and functions
+            // Cole aqui suas credenciais do Firebase:
+            const firebaseConfig = {
+              apiKey: "AIzaSyDZfckRxf7ofK7Kvo_M6ovZq9MfK2jEkW8",
+              authDomain: "alegria-fest.firebaseapp.com",
+              projectId: "alegria-fest",
+              storageBucket: "alegria-fest.firebasestorage.app",
+              messagingSenderId: "516153158424",
+              appId: "1:516153158424:web:15ff67e4ebd9311ec48c6d",
+              measurementId: "G-L4HEY8EG88"
+            };
+            if(firebaseConfig && firebaseConfig.apiKey){
+              firebase.initializeApp(firebaseConfig);
+              const db = firebase.firestore();
 
-        function startGame() {
-            score = 0;
-            scoreDisplay.innerText = 'Pontuação: 0';
-            gameArea.innerHTML = '';
-            spawnInterval = 1000; // Reseta a velocidade
-            targetLifetime = 2000; // Reseta o tempo de vida dos alvos
+              function renderComentario(doc) {
+                const nome = doc.data().nome || 'Anônimo';
+                const texto = doc.data().texto || '';
+                const estrelas = doc.data().estrelas || 5;
+                const data = doc.data().data ? new Date(doc.data().data.seconds*1000) : null;
+                const dataStr = data ? data.toLocaleDateString('pt-BR') : '';
+                let estrelasHtml = '';
+                for(let i=1;i<=5;i++) estrelasHtml += i<=estrelas ? '★' : '☆';
+                const html = `<div class='depoimento'>
+                  <div class='depoimento-nome'>${nome}</div>
+                  <div class='depoimento-estrelas'>${estrelasHtml}</div>
+                  <p>${texto}</p>
+                  <div style='font-size:0.9em;color:#aaa;margin-top:4px;'>${dataStr}</div>
+                </div>`;
+                return html;
+              }
 
-            gameInterval = setInterval(spawnTarget, spawnInterval);
-        }
+              function carregarComentarios() {
+                db.collection('comentarios').orderBy('data','desc').limit(10).onSnapshot(snapshot => {
+                  let html = '';
+                  snapshot.forEach(doc => { html += renderComentario(doc); });
+                  document.getElementById('depoimentos-list').innerHTML = html + document.getElementById('depoimentos-list').innerHTML;
+                });
+              }
 
-        document.getElementById('restartButton').addEventListener('click', startGame);
-        startGame();
-    </script>
+              window.enviarComentario = function() {
+                const nome = document.getElementById('comentario-nome').value.trim();
+                const texto = document.getElementById('comentario-texto').value.trim();
+                const estrelas = parseInt(document.getElementById('comentario-estrelas').value) || 5;
+                if(!texto){
+                  document.getElementById('comentario-status').innerText = 'Digite um comentário.';
+                  return;
+                }
+                db.collection('comentarios').add({
+                  nome: nome || 'Anônimo',
+                  texto: texto,
+                  estrelas: estrelas,
+                  data: new Date()
+                }).then(()=>{
+                  document.getElementById('comentario-status').innerText = 'Comentário enviado!';
+                  document.getElementById('comentario-nome').value = '';
+                  document.getElementById('comentario-texto').value = '';
+                  document.getElementById('comentario-estrelas').value = 5;
+                  setEstrelas(5);
+                  setTimeout(()=>{document.getElementById('comentario-status').innerText='';},2000);
+                }).catch(()=>{
+                  document.getElementById('comentario-status').innerText = 'Erro ao enviar. Tente novamente.';
+                });
+              }
 
-</body>
+              function setEstrelas(valor) {
+                document.getElementById('comentario-estrelas').value = valor;
+                document.querySelectorAll('.estrelas-input .estrela').forEach((el,i)=>{
+                  el.style.color = (i<valor)?'#e74c3c':'#ccc';
+                });
+              }
+              document.querySelectorAll('.estrelas-input .estrela').forEach((el,i)=>{
+                el.addEventListener('click',()=>setEstrelas(i+1));
+              });
+
+              setEstrelas(5);
+              carregarComentarios();
+            }
+        </script>
+    </head>
+    <body>
+        <div class="welcome-screen" id="welcome">
+            <video autoplay muted loop>
+                <source src="vid/inicio.mp4" type="video/mp4">
+                Seu navegador não suporta vídeo.
+            </video>
+            <img src="img/Alegria Fest.PNG" alt="Logo Alegria Fest" class="welcome-logo">
+            <h2>Bem-vindo ao Alegria Fest!</h2>
+        </div>
+        <header>
+            <img src="img/Alegria Fest.PNG" alt="Logo Alegria Fest" style="width: 200px; border-radius: 16px; box-shadow: 0 2px 12px #e74c3c33;">
+            <h1>Alegria Fest <span class="badge-verificado" title="Empresa Verificada">✔️</span></h1>
+            <div class="sub-header">Profissionalismo, confiança e alegria em cada evento!</div>
+            <nav>
+                <a href="#sobre">Sobre</a>
+                <a href="#servicos">Serviços</a>
+                <a href="#depoimentos">Depoimentos</a>
+                <a href="#contato">Contato</a>
+            </nav>
+        </header>
+        <section id="sobre">
+            <h2>Sobre Nós</h2>
+            <p>Bem-vindo ao <b>Alegria Fest</b>! Somos especialistas em transformar sonhos em eventos inesquecíveis. Nossa equipe une criatividade, experiência e paixão para criar momentos únicos para você, sua família e sua empresa. Confiança, profissionalismo e alegria em cada detalhe!</p>
+        </section>
+        <section id="servicos">
+            <h2>Nossos Serviços</h2>
+            <div class="servicos">
+                <div class="servico-card" onclick="abrirModal('Planejamento de Eventos')">
+                    <img src="https://images.unsplash.com/photo-1515168833906-d2a3b82b1e1c?auto=format&fit=crop&w=400&q=80" alt="Planejamento de Eventos">
+                    <h3>Planejamento de Eventos</h3>
+                    <p>Organização completa para festas, casamentos, aniversários e eventos corporativos.</p>
+                    <div class="servico-preco">Preço: A combinar</div>
+                    <button>Solicitar Orçamento</button>
+                </div>
+                <div class="servico-card" onclick="abrirModal('Decoração Personalizada')">
+                    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Decoração Personalizada">
+                    <h3>Decoração Personalizada</h3>
+                    <p>Ambientes decorados com criatividade e bom gosto, do jeito que você sonha.</p>
+                    <div class="servico-preco">Preço: A combinar</div>
+                    <button>Solicitar Orçamento</button>
+                </div>
+                <div class="servico-card" onclick="abrirModal('Contratação de Entretenimento')">
+                    <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Entretenimento">
+                    <h3>Contratação de Entretenimento</h3>
+                    <p>Shows, DJs, animadores, mágicos e atrações para todas as idades e estilos.</p>
+                    <div class="servico-preco">Preço: A combinar</div>
+                    <button>Solicitar Orçamento</button>
+                </div>
+                <div class="servico-card" onclick="abrirModal('Serviços de Buffet')">
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Buffet">
+                    <h3>Serviços de Buffet</h3>
+                    <p>Cardápios variados, deliciosos e personalizados para o seu evento.</p>
+                    <div class="servico-preco">Preço: A combinar</div>
+                    <button>Solicitar Orçamento</button>
+                </div>
+            </div>
+        </section>
+        <section id="depoimentos">
+            <h2>O que dizem nossos clientes</h2>
+            <div class="depoimentos-list" id="depoimentos-list">
+                <div class="depoimento">
+                    <div class="depoimento-nome">Ana Paula</div>
+                    <div class="depoimento-estrelas">★★★★★</div>
+                    <p>"O Alegria Fest fez do aniversário do meu filho um sonho! Organização impecável e muita atenção aos detalhes."</p>
+                </div>
+                <div class="depoimento">
+                    <div class="depoimento-nome">Carlos Eduardo</div>
+                    <div class="depoimento-estrelas">★★★★★</div>
+                    <p>"Equipe super profissional, decoração linda e buffet delicioso. Recomendo de olhos fechados!"</p>
+                </div>
+                <div class="depoimento">
+                    <div class="depoimento-nome">Juliana Silva</div>
+                    <div class="depoimento-estrelas">★★★★★</div>
+                    <p>"Contratei para um evento corporativo e foi um sucesso. Todos elogiaram!"</p>
+                </div>
+            </div>
+            <div class="comentario-form">
+                <h3>Deixe seu comentário</h3>
+                <input type="text" id="comentario-nome" placeholder="Seu nome" maxlength="30" required>
+                <textarea id="comentario-texto" placeholder="Seu comentário" maxlength="180" required></textarea>
+                <div class="estrelas-input" style="margin: 6px 0 0 0;">
+                    <label style="font-weight:600;color:#e74c3c;">Sua avaliação:</label><br>
+                    <span class="estrela" data-valor="1">&#9733;</span>
+                    <span class="estrela" data-valor="2">&#9733;</span>
+                    <span class="estrela" data-valor="3">&#9733;</span>
+                    <span class="estrela" data-valor="4">&#9733;</span>
+                    <span class="estrela" data-valor="5">&#9733;</span>
+                </div>
+                <input type="hidden" id="comentario-estrelas" value="5">
+                <button onclick="enviarComentario()">Enviar Comentário</button>
+                <div id="comentario-status" style="margin-top:8px;color:#e74c3c;font-size:0.95em;"></div>
+            </div>
+        </section>
+        <section id="contato">
+            <h2>Entre em Contato</h2>
+            <p><b>Nome dos Participantes:</b> João, Maria, Carlos</p>
+            <p><b>Email:</b> contato@alegriafest.com</p>
+            <p><b>Telefone:</b> (11) 1234-5678</p>
+        </section>
+        <!-- Modal -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="fecharModal()">&times;</span>
+                <h2>Solicitação de Serviço</h2>
+                <img src="img/Alegria Fest.PNG" alt="Logo">
+                <input type="text" id="nome" placeholder="Seu Nome" required>
+                <input type="text" id="servicoSelecionado" placeholder="Serviço Desejado" readonly>
+                <input type="email" id="email" placeholder="Seu E-mail" required>
+                <button onclick="enviarWhatsApp()">Enviar para o WhatsApp</button>
+            </div>
+        </div>
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2025 Alegria Fest. Todos os direitos reservados.</p>
+                <div class="footer-social">
+                    <a href="https://www.instagram.com/" target="_blank" title="Instagram" class="footer-icon">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="6" fill="#fff"/><path d="M16.5 7.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-4.5 1.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0 1.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" fill="#e74c3c"/></svg>
+                    </a>
+                    <a href="https://www.facebook.com/" target="_blank" title="Facebook" class="footer-icon">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="6" fill="#fff"/><path d="M15.5 8.5h-1.5a.5.5 0 0 0-.5.5v1.5h2l-.25 2h-1.75v6h-2.5v-6h-1.5v-2h1.5V9a2 2 0 0 1 2-2h1.5v2Z" fill="#e74c3c"/></svg>
+                    </a>
+                    <a href="https://wa.me/5511999999999" target="_blank" title="WhatsApp" class="footer-icon">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="6" fill="#fff"/><path d="M12 7a5 5 0 0 1 4.9 6.1l.9.9a1 1 0 0 1-1.4 1.4l-.9-.9A5 5 0 1 1 12 7Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" fill="#25d366"/></svg>
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </body>
 </html>
